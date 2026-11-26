@@ -90,6 +90,10 @@ var TOURNAMENTS = [
   matches:fixedDays([["2026-11-27"],["2026-11-28"],["2026-11-29"]],[810,845,890,930,970,1010],40)},
  {id:"cegc-grand-finals",name:"CEGC Grand Finals",org:"Skyesports (Chennai Esports Global Championship)",color:"#B4234F",
   matches:fixedDays([["2026-12-11"],["2026-12-12"],["2026-12-13"]],[810,845,890,930,970,1010],40)},
+ {id:"pic-last-chance",name:"PIC Last Chance (PUBG PC)",org:"KRAFTON India",color:"#475569",
+  matches:pmTba(["2026-11-26"])},
+ {id:"pic-grand-finals",name:"PIC Grand Finals (PUBG PC)",org:"KRAFTON India",color:"#0E7490",
+  matches:pmTba(["2026-11-28","2026-11-29"])},
 
 ];
 /* ============================================= */
@@ -99,7 +103,9 @@ var LINK_RULES = {
  "pmgc-gauntlet":[["pmgc","global championship"],["gauntlet"]],
  "pmgc-group-stage":[["pmgc","global championship"],["group"]],
  "pmgc-last-chance":[["pmgc","global championship"],["last chance"]],
- "pmgc-grand-finals":[["pmgc","global championship"],["grand final"]]
+ "pmgc-grand-finals":[["pmgc","global championship"],["grand final"]],
+ "pic-last-chance":[["pic 2026","india challenge"],["last chance"]],
+ "pic-grand-finals":[["pic 2026","india challenge"],["grand final"]]
 };
 function istDay(iso){return new Date(new Date(iso).getTime()+19800000).toISOString().slice(0,10);}
 function applyLinks(list){
@@ -147,7 +153,7 @@ function home(){
   var y=view.getFullYear(),mo=view.getMonth(),offset=(view.getDay()+6)%7,days=new Date(y,mo+1,0).getDate();
   var live=[];TOURNAMENTS.forEach(function(t){t.matches.forEach(function(m){if(status(m)==="live")live.push({t:t,m:m});});});
   var h='<div class="top"><div><h1>BGMI match calendar</h1><p class="sub">Pick a tournament, then open any match when it goes live.</p></div></div>';
-  h+='<p class="note">PMGC matches start at 5:30 PM IST with a 40-minute gap between matches. CEGC stage dates come from published schedules, but its match times are estimates. Stream links are only added for the two PMGC Gauntlet days.</p>';
+  h+='<p class="note">PMGC matches start at 5:30 PM IST with a 40-minute gap between matches. CEGC and PIC stage dates come from published schedules, but their match times are not confirmed yet. Stream links fill in automatically once organisers schedule them on YouTube, and CEGC links are added by hand.</p>';
   if(live.length){h+='<div class="live-strip" role="status"><h2>Live now</h2>'+live.map(function(x){return '<div class="lrow"><span><b>'+x.t.name+'</b> · '+x.m.name+'</span>'+watchBtn(x.m)+'</div>';}).join("")+'</div>';}
   h+='<div class="cal-head"><button class="btn" id="prev" aria-label="Previous month">‹ Prev</button><h2>'+MONTHS[mo]+" "+y+'</h2><button class="btn" id="next" aria-label="Next month">Next ›</button></div>';
   h+='<div class="grid-scroll"><div class="grid">'+DAY.map(function(x){return '<div class="dow">'+x+'</div>';}).join("");
