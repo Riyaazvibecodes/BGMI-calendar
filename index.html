@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BGMI Match Calendar</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F5F6FA;--surf:#FFFFFF;--ink:#14183A;--mute:#5E6486;--line:#DDE0EE;--brand:#2438B8;--live:#E5383B;--gold:#F2B705;--ok:#1F9D63;
+ color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1226;--surf:#181C3A;--ink:#ECEEFB;--mute:#9AA0C8;--line:#2A2F5A;--brand:#7C8CFF;--live:#FF6B6E;--gold:#FFCB2E;--ok:#46C98B;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0F1226;--surf:#181C3A;--ink:#ECEEFB;--mute:#9AA0C8;--line:#2A2F5A;--brand:#7C8CFF;--live:#FF6B6E;--gold:#FFCB2E;--ok:#46C98B;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Barlow,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45}
+h1,h2,h3{font-family:"Barlow Condensed","Arial Narrow",Impact,sans-serif;margin:0;letter-spacing:.01em}
+.wrap{max-width:980px;margin:0 auto;padding:20px 16px 56px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:clamp(34px,7vw,52px);line-height:1;font-weight:700}
+.sub{color:var(--mute);margin:6px 0 0}
+.note{background:color-mix(in srgb,var(--gold) 22%,transparent);border:1px solid var(--gold);border-radius:8px;padding:8px 12px;font-size:14px;margin:0 0 18px}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--surf);color:var(--ink);border-radius:8px;padding:8px 12px;font-weight:600}
+.btn:focus-visible,a:focus-visible,.chip:focus-visible,.trow:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.live-strip{border:2px solid var(--live);border-radius:10px;background:var(--surf);padding:12px 14px;margin-bottom:18px}
+.live-strip h2{font-size:22px;color:var(--live);margin-bottom:6px}
+.lrow{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:6px 0;flex-wrap:wrap}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin:6px 0 10px}
+.cal-head h2{font-size:28px}
+.grid-scroll{overflow-x:auto}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surf);min-width:560px}
+.dow{padding:6px;font-size:13px;font-weight:600;color:var(--mute);text-align:center;border-bottom:1px solid var(--line);background:var(--bg)}
+.day{min-height:84px;padding:4px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.day:nth-child(7n){border-right:0}
+.day.out{background:var(--bg);opacity:.55}
+.day .n{font-size:13px;color:var(--mute);font-weight:600;margin-bottom:2px}
+.day.today .n{background:var(--ink);color:var(--bg);border-radius:10px;display:inline-block;padding:0 7px}
+.chip{display:block;width:100%;text-align:left;border:0;border-radius:5px;padding:2px 6px;margin-top:3px;font-size:12px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.more{font-size:11px;color:var(--mute);margin-top:2px}
+h2.sec{font-size:26px;margin:26px 0 10px}
+.tlist{display:grid;gap:10px}
+.trow{display:flex;align-items:center;gap:12px;background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;text-align:left;width:100%;color:inherit}
+.bar{width:6px;align-self:stretch;border-radius:3px}
+.trow .nm{font-weight:600;font-size:18px}
+.trow .meta{color:var(--mute);font-size:14px}
+.pill{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;border:1px solid currentColor;white-space:nowrap}
+.pill.live{color:var(--live)}.pill.up{color:var(--brand)}.pill.end{color:var(--mute)}
+.back{margin-bottom:14px}
+.thead{border-left:8px solid var(--c,var(--brand));padding-left:14px;margin-bottom:18px}
+.thead h1{font-size:clamp(30px,6vw,44px)}
+.dayh{font-family:"Barlow Condensed",sans-serif;font-size:22px;font-weight:700;margin:20px 0 8px}
+.mrow{display:grid;grid-template-columns:78px 1fr auto;gap:12px;align-items:center;background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px}
+.mrow .tm{font-family:"Barlow Condensed",sans-serif;font-size:22px;font-weight:700}
+.mrow .st{color:var(--mute);font-size:14px}
+.watch{display:inline-block;text-decoration:none;border-radius:8px;padding:8px 14px;font-weight:700;font-size:15px;white-space:nowrap}
+.watch.on{background:var(--live);color:#fff}
+.watch.re{background:var(--surf);color:var(--brand);border:1px solid var(--brand)}
+.watch.off{background:var(--bg);color:var(--mute);border:1px dashed var(--line);cursor:not-allowed}
+@media (max-width:560px){.mrow{grid-template-columns:62px 1fr}.mrow .act{grid-column:1/-1}}
+@media (prefers-reduced-motion:no-preference){.pill.live{animation:pulse 1.6s ease-in-out infinite}@keyframes pulse{50%{opacity:.45}}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+/* ============ EDIT YOUR DATA HERE ============
+   Each tournament: id, name, org, color, matches[].
+   Each match: name, start (ISO with +05:30), mins (how long it runs), link (stream URL, or "" if not known yet).
+   The sample data below is made up and moves with today’s date so you can try every state. */
+var IST = "+05:30";
+function d(off,h,m){var t=new Date();t.setDate(t.getDate()+off);t.setHours(h,m||0,0,0);return t.toISOString();}
+var SAMPLE_LINK = "https://www.youtube.com/";
+function hm(t){return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");}
+/* pmDays: [[date, link], ...], matches per day, minutes between matches, minutes a match runs. First match 5:30 PM IST. */
+function pmDays(days,count,gap,mins){var out=[];days.forEach(function(x,i){for(var n=0;n<count;n++){out.push({name:"Day "+(i+1)+" – Match "+(n+1),start:x[0]+"T"+hm(1050+n*gap)+":00"+IST,mins:mins,link:x[1]||""});}});return out;}
+/* pmTba: one placeholder entry per day until the real match schedule is out. */
+function pmTba(days){return days.map(function(x,i){return {name:"Day "+(i+1)+" – matches (times to be confirmed)",start:x+"T"+hm(1050)+":00"+IST,mins:240,link:""};});}
+/* fixedDays: [[date, link], ...] and a list of start times in minutes after midnight IST (e.g. 810 = 1:30 PM). */
+function fixedDays(days,times,mins){var out=[];days.forEach(function(x,i){times.forEach(function(t,n){out.push({name:"Day "+(i+1)+" – Match "+(n+1),start:x[0]+"T"+hm(t)+":00"+IST,mins:mins,link:x[1]||""});});});return out;}
+var TOURNAMENTS = [
+ {id:"pmgc-gauntlet",name:"PMGC Gauntlet",org:"PUBG Mobile Esports",color:"#2438B8",
+  matches:pmDays([["2026-11-26","https://www.youtube.com/live/xndWYGgglL8"],["2026-11-27","https://www.youtube.com/live/iqV_BeHkidE"]],6,40,40)},
+ {id:"pmgc-group-stage",name:"PMGC Group Stage",org:"PUBG Mobile Esports",color:"#7B2CBF",
+  matches:pmDays([["2026-11-29"],["2026-11-30"],["2026-12-02"],["2026-12-03"]],6,40,40)},
+ {id:"pmgc-last-chance",name:"PMGC Last Chance",org:"PUBG Mobile Esports",color:"#C2410C",
+  matches:pmDays([["2026-12-05"],["2026-12-06"]],6,40,40)},
+ {id:"pmgc-grand-finals",name:"PMGC Grand Finals",org:"PUBG Mobile Esports",color:"#9A6700",
+  matches:pmDays([["2026-12-11"],["2026-12-12"],["2026-12-13"]],6,40,40)},
+ {id:"cegc-last-chance",name:"CEGC Last Chance",org:"Skyesports (Chennai Esports Global Championship)",color:"#0F8B6D",
+  matches:fixedDays([["2026-11-27"],["2026-11-28"],["2026-11-29"]],[810,845,890,930,970,1010],40)},
+ {id:"cegc-grand-finals",name:"CEGC Grand Finals",org:"Skyesports (Chennai Esports Global Championship)",color:"#B4234F",
+  matches:fixedDays([["2026-12-11"],["2026-12-12"],["2026-12-13"]],[810,845,890,930,970,1010],40)},
+
+];
+/* ============================================= */
+
+/* Automatic links: links.json is refreshed by a GitHub Action (see README). Links typed in by hand above always win. */
+var LINK_RULES = {
+ "pmgc-gauntlet":[["pmgc","global championship"],["gauntlet"]],
+ "pmgc-group-stage":[["pmgc","global championship"],["group"]],
+ "pmgc-last-chance":[["pmgc","global championship"],["last chance"]],
+ "pmgc-grand-finals":[["pmgc","global championship"],["grand final"]]
+};
+function istDay(iso){return new Date(new Date(iso).getTime()+19800000).toISOString().slice(0,10);}
+function applyLinks(list){
+  TOURNAMENTS.forEach(function(t){
+    var rule=LINK_RULES[t.id]; if(!rule)return;
+    t.matches.forEach(function(m){
+      if(m.link)return;
+      var day=m.start.slice(0,10);
+      var hit=list.filter(function(v){
+        if(istDay(v.scheduledStart)!==day)return false;
+        var title=v.title.toLowerCase();
+        return rule.every(function(g){return g.some(function(k){return title.indexOf(k)>-1;});});
+      })[0];
+      if(hit)m.link=hit.url;
+    });
+  });
+}
+
+var MIN=60000, view=new Date(); view.setDate(1);
+var app=document.getElementById("app");
+var DAY=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+var MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+TOURNAMENTS.forEach(function(t){
+  t.matches.sort(function(a,b){return new Date(a.start)-new Date(b.start);});
+  t.first=new Date(t.matches[0].start); t.last=new Date(t.matches[t.matches.length-1].start);
+});
+function status(m){var s=new Date(m.start).getTime(),n=Date.now();return n<s?"up":(n<s+(m.mins||150)*MIN?"live":"end");}
+function tStatus(t){var s=t.matches.map(status);return s.indexOf("live")>-1?"live":(s.indexOf("up")>-1?"up":"end");}
+function dkey(x){x=new Date(x);return x.getFullYear()+"-"+x.getMonth()+"-"+x.getDate();}
+function sod(x){x=new Date(x);x.setHours(0,0,0,0);return x;}
+function fmtTime(x){return new Date(x).toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit",hour12:true});}
+function fmtDate(x,o){return new Date(x).toLocaleDateString("en-IN",o||{day:"numeric",month:"short"});}
+function left(m){var ms=new Date(m.start)-Date.now();if(ms<=0)return "";var mi=Math.round(ms/MIN);if(mi<60)return "Starts in "+mi+" min";var h=Math.floor(mi/60);if(h<24)return "Starts in "+h+"h "+(mi%60)+"m";return "Starts in "+Math.floor(h/24)+" days";}
+function watchBtn(m){
+  var s=status(m);
+  if(!m.link) return '<span class="watch off" title="Stream link not added yet">Link coming soon</span>';
+  if(s==="live") return '<a class="watch on" href="'+m.link+'" target="_blank" rel="noopener">Watch live</a>';
+  if(s==="up") return '<a class="watch re" href="'+m.link+'" target="_blank" rel="noopener">Open stream page</a>';
+  return '<a class="watch re" href="'+m.link+'" target="_blank" rel="noopener">Watch replay</a>';
+}
+function pill(s){return s==="live"?'<span class="pill live">LIVE</span>':s==="up"?'<span class="pill up">Upcoming</span>':'<span class="pill end">Finished</span>';}
+
+function home(){
+  var y=view.getFullYear(),mo=view.getMonth(),offset=(view.getDay()+6)%7,days=new Date(y,mo+1,0).getDate();
+  var live=[];TOURNAMENTS.forEach(function(t){t.matches.forEach(function(m){if(status(m)==="live")live.push({t:t,m:m});});});
+  var h='<div class="top"><div><h1>BGMI match calendar</h1><p class="sub">Pick a tournament, then open any match when it goes live.</p></div></div>';
+  h+='<p class="note">PMGC matches start at 5:30 PM IST with a 40-minute gap between matches. CEGC stage dates come from published schedules, but its match times are estimates. Stream links are only added for the two PMGC Gauntlet days.</p>';
+  if(live.length){h+='<div class="live-strip" role="status"><h2>Live now</h2>'+live.map(function(x){return '<div class="lrow"><span><b>'+x.t.name+'</b> · '+x.m.name+'</span>'+watchBtn(x.m)+'</div>';}).join("")+'</div>';}
+  h+='<div class="cal-head"><button class="btn" id="prev" aria-label="Previous month">‹ Prev</button><h2>'+MONTHS[mo]+" "+y+'</h2><button class="btn" id="next" aria-label="Next month">Next ›</button></div>';
+  h+='<div class="grid-scroll"><div class="grid">'+DAY.map(function(x){return '<div class="dow">'+x+'</div>';}).join("");
+  var total=Math.ceil((offset+days)/7)*7, today=dkey(new Date());
+  for(var i=0;i<total;i++){
+    var dt=new Date(y,mo,1-offset+i),out=dt.getMonth()!==mo,here=[];
+    TOURNAMENTS.forEach(function(t){if(t.matches.some(function(m){return dkey(m.start)===dkey(dt);}))here.push(t);});
+    h+='<div class="day'+(out?" out":"")+(dkey(dt)===today?" today":"")+'"><div class="n">'+dt.getDate()+'</div>';
+    here.slice(0,2).forEach(function(t){h+='<button class="chip" style="background:'+t.color+'" data-t="'+t.id+'">'+t.name+'</button>';});
+    if(here.length>2)h+='<div class="more">+'+(here.length-2)+' more</div>';
+    h+='</div>';
+  }
+  h+='</div></div><h2 class="sec">All tournaments</h2><div class="tlist">';
+  TOURNAMENTS.forEach(function(t){h+='<button class="trow" data-t="'+t.id+'"><span class="bar" style="background:'+t.color+'"></span><span style="flex:1"><span class="nm">'+t.name+'</span><br><span class="meta">'+fmtDate(t.first)+' – '+fmtDate(t.last)+' · '+t.matches.length+' matches · '+t.org+'</span></span>'+pill(tStatus(t))+'</button>';});
+  h+='</div>';
+  app.innerHTML=h;
+  document.getElementById("prev").onclick=function(){view.setMonth(view.getMonth()-1);render();};
+  document.getElementById("next").onclick=function(){view.setMonth(view.getMonth()+1);render();};
+  app.querySelectorAll("[data-t]").forEach(function(b){b.onclick=function(){location.hash="t-"+b.getAttribute("data-t");};});
+}
+
+function tournament(id){
+  var t=TOURNAMENTS.filter(function(x){return x.id===id;})[0];
+  if(!t){location.hash="";return;}
+  var h='<button class="btn back" id="back">‹ Back to calendar</button>';
+  h+='<div class="thead" style="--c:'+t.color+'"><h1>'+t.name+'</h1><p class="sub">'+fmtDate(t.first,{day:"numeric",month:"long"})+' – '+fmtDate(t.last,{day:"numeric",month:"long",year:"numeric"})+' · '+t.org+'</p></div>';
+  var cur="";
+  t.matches.forEach(function(m){
+    var k=dkey(m.start);
+    if(k!==cur){cur=k;h+='<div class="dayh">'+fmtDate(m.start,{weekday:"long",day:"numeric",month:"long"})+'</div>';}
+    var s=status(m);
+    h+='<div class="mrow"><div class="tm">'+fmtTime(m.start)+'</div><div><b>'+m.name+'</b><div class="st">'+(s==="up"?left(m):s==="live"?"Happening now":"Ended")+'</div></div><div class="act">'+pill(s)+' '+watchBtn(m)+'</div></div>';
+  });
+  app.innerHTML=h;
+  document.getElementById("back").onclick=function(){location.hash="";};
+  window.scrollTo(0,0);
+}
+
+function render(){
+  var hs=location.hash.replace("#","");
+  if(hs.indexOf("t-")===0)tournament(hs.slice(2));else home();
+}
+window.addEventListener("hashchange",render);
+setInterval(function(){var y=window.scrollY;render();window.scrollTo(0,y);},60000);
+render();
+fetch("links.json?t="+Date.now()).then(function(r){return r.ok?r.json():null;}).then(function(j){if(j&&j.videos&&j.videos.length){applyLinks(j.videos);render();}}).catch(function(){});
+</script>
+</body>
+</html>
