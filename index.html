@@ -58,6 +58,19 @@ h2.sec{font-size:26px;margin:26px 0 10px}
 .watch.off{background:var(--bg);color:var(--mute);border:1px dashed var(--line);cursor:not-allowed}
 @media (max-width:560px){.mrow{grid-template-columns:62px 1fr}.mrow .act{grid-column:1/-1}}
 @media (prefers-reduced-motion:no-preference){.pill.live{animation:pulse 1.6s ease-in-out infinite}@keyframes pulse{50%{opacity:.45}}}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 16px}
+.fbtn{border:1px solid var(--line);background:var(--surf);color:var(--ink);border-radius:999px;padding:6px 14px;font-weight:600}
+.fbtn[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--bg)}
+.fchk{display:flex;gap:6px;align-items:center;margin-left:auto;font-weight:600}
+.today{background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:18px}
+.today h2{font-size:26px;margin-bottom:6px}
+.trw{display:grid;grid-template-columns:74px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.trw .tm{font-family:"Barlow Condensed",sans-serif;font-size:22px;font-weight:700}
+.trw .st{color:var(--mute);font-size:14px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.cal{font-size:13px;font-weight:600;color:var(--brand);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:6px 9px;background:var(--surf);white-space:nowrap}
+@media (max-width:560px){.trw{grid-template-columns:64px 1fr}.trw .acts{grid-column:1/-1}}
 </style>
 </head>
 <body>
@@ -107,6 +120,38 @@ var LINK_RULES = {
  "pic-last-chance":[["pic 2026","india challenge"],["last chance"]],
  "pic-grand-finals":[["pic 2026","india challenge"],["grand final"]]
 };
+/* Tags used by the filters. The part of a tournament id before the first dash picks the tag (pmgc-..., cegc-..., pic-...). */
+var TAGS={pmgc:{game:"PUBG Mobile",india:false},cegc:{game:"BGMI",india:true},pic:{game:"PUBG PC",india:true}};
+function tag(t){return TAGS[t.id.split("-")[0]]||{game:"BGMI",india:true};}
+var F={game:"All",india:false};
+function vis(t){var g=tag(t);return (F.game==="All"||g.game===F.game)&&(!F.india||g.india);}
+function z(n){return String(n).padStart(2,"0");}
+function stamp(x){var u=new Date(x);return u.getUTCFullYear()+z(u.getUTCMonth()+1)+z(u.getUTCDate())+"T"+z(u.getUTCHours())+z(u.getUTCMinutes())+"00Z";}
+function calBtns(t,m){
+  var s=stamp(m.start),e=stamp(new Date(m.start).getTime()+(m.mins||150)*MIN);
+  var title=t.name+" – "+m.name,note=(m.link?"Watch: "+m.link+" – ":"")+"Times can change. Check the organiser’s official channels.";
+  var g="https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(title)+"&dates="+s+"/"+e+"&details="+encodeURIComponent(note);
+  var ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Match Calendar//EN","BEGIN:VEVENT","UID:"+t.id+"-"+s+"@match-calendar","DTSTAMP:"+stamp(new Date()),"DTSTART:"+s,"DTEND:"+e,"SUMMARY:"+title,"DESCRIPTION:"+note,"BEGIN:VALARM","TRIGGER:-PT15M","ACTION:DISPLAY","DESCRIPTION:Match starts in 15 minutes","END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
+  var href="data:text/calendar;charset=utf-8,"+encodeURIComponent(ics).replace(/'/g,"%27");
+  return '<a class="cal" href="'+g+'" target="_blank" rel="noopener">+ Google Calendar</a><a class="cal" href="'+href+'" download="'+t.id+'-'+s+'.ics">+ .ics</a>';
+}
+function filtersHtml(){
+  var g=["All","BGMI","PUBG Mobile","PUBG PC"];
+  return '<div class="filters" role="group" aria-label="Filter tournaments">'+g.map(function(x){return '<button class="fbtn" data-g="'+x+'" aria-pressed="'+(F.game===x)+'">'+x+'</button>';}).join("")+'<label class="fchk"><input type="checkbox" id="fin"'+(F.india?" checked":"")+'> Indian events only</label></div>';
+}
+function todayHtml(){
+  var today=istDay(new Date().toISOString()),rows=[],order={live:0,up:1,end:2};
+  TOURNAMENTS.forEach(function(t){if(!vis(t))return;t.matches.forEach(function(m){if(m.start.slice(0,10)===today)rows.push({t:t,m:m});});});
+  rows.sort(function(a,b){return order[status(a.m)]-order[status(b.m)]||new Date(a.m.start)-new Date(b.m.start);});
+  var h='<div class="today"><h2>Today’s matches</h2>';
+  if(!rows.length){
+    var nx=null;
+    TOURNAMENTS.forEach(function(t){if(!vis(t))return;t.matches.forEach(function(m){if(status(m)==="up"&&(!nx||new Date(m.start)<new Date(nx.m.start)))nx={t:t,m:m};});});
+    return h+'<p class="sub">No matches today.'+(nx?' Next up: <b>'+nx.t.name+'</b> on '+fmtDate(nx.m.start,{weekday:"long",day:"numeric",month:"long"})+' at '+fmtTime(nx.m.start)+'.':'')+'</p></div>';
+  }
+  rows.forEach(function(r){var s=status(r.m);h+='<div class="trw"><div class="tm">'+fmtTime(r.m.start)+'</div><div><span class="dot" style="background:'+r.t.color+'"></span><b>'+r.t.name+'</b><div class="st">'+r.m.name+' · '+(s==="up"?left(r.m):s==="live"?"Happening now":"Ended")+'</div></div><div class="acts">'+pill(s)+' '+watchBtn(r.m)+(s==="end"?"":calBtns(r.t,r.m))+'</div></div>';});
+  return h+'</div>';
+}
 function istDay(iso){return new Date(new Date(iso).getTime()+19800000).toISOString().slice(0,10);}
 function applyLinks(list){
   TOURNAMENTS.forEach(function(t){
@@ -152,27 +197,29 @@ function pill(s){return s==="live"?'<span class="pill live">LIVE</span>':s==="up
 function home(){
   var y=view.getFullYear(),mo=view.getMonth(),offset=(view.getDay()+6)%7,days=new Date(y,mo+1,0).getDate();
   var live=[];TOURNAMENTS.forEach(function(t){t.matches.forEach(function(m){if(status(m)==="live")live.push({t:t,m:m});});});
-  var h='<div class="top"><div><h1>BGMI match calendar</h1><p class="sub">Pick a tournament, then open any match when it goes live.</p></div></div>';
+  var h='<div class="top"><div><h1>Esports match calendar</h1><p class="sub">Pick a tournament, then open any match when it goes live.</p></div></div>';
   h+='<p class="note">PMGC matches start at 5:30 PM IST with a 40-minute gap between matches. CEGC and PIC stage dates come from published schedules, but their match times are not confirmed yet. Stream links fill in automatically once organisers schedule them on YouTube, and CEGC links are added by hand.</p>';
-  if(live.length){h+='<div class="live-strip" role="status"><h2>Live now</h2>'+live.map(function(x){return '<div class="lrow"><span><b>'+x.t.name+'</b> · '+x.m.name+'</span>'+watchBtn(x.m)+'</div>';}).join("")+'</div>';}
+  h+=filtersHtml()+todayHtml();
   h+='<div class="cal-head"><button class="btn" id="prev" aria-label="Previous month">‹ Prev</button><h2>'+MONTHS[mo]+" "+y+'</h2><button class="btn" id="next" aria-label="Next month">Next ›</button></div>';
   h+='<div class="grid-scroll"><div class="grid">'+DAY.map(function(x){return '<div class="dow">'+x+'</div>';}).join("");
   var total=Math.ceil((offset+days)/7)*7, today=dkey(new Date());
   for(var i=0;i<total;i++){
     var dt=new Date(y,mo,1-offset+i),out=dt.getMonth()!==mo,here=[];
-    TOURNAMENTS.forEach(function(t){if(t.matches.some(function(m){return dkey(m.start)===dkey(dt);}))here.push(t);});
+    TOURNAMENTS.forEach(function(t){if(vis(t)&&t.matches.some(function(m){return dkey(m.start)===dkey(dt);}))here.push(t);});
     h+='<div class="day'+(out?" out":"")+(dkey(dt)===today?" today":"")+'"><div class="n">'+dt.getDate()+'</div>';
     here.slice(0,2).forEach(function(t){h+='<button class="chip" style="background:'+t.color+'" data-t="'+t.id+'">'+t.name+'</button>';});
     if(here.length>2)h+='<div class="more">+'+(here.length-2)+' more</div>';
     h+='</div>';
   }
   h+='</div></div><h2 class="sec">All tournaments</h2><div class="tlist">';
-  TOURNAMENTS.forEach(function(t){h+='<button class="trow" data-t="'+t.id+'"><span class="bar" style="background:'+t.color+'"></span><span style="flex:1"><span class="nm">'+t.name+'</span><br><span class="meta">'+fmtDate(t.first)+' – '+fmtDate(t.last)+' · '+t.matches.length+' matches · '+t.org+'</span></span>'+pill(tStatus(t))+'</button>';});
+  TOURNAMENTS.filter(vis).forEach(function(t){h+='<button class="trow" data-t="'+t.id+'"><span class="bar" style="background:'+t.color+'"></span><span style="flex:1"><span class="nm">'+t.name+'</span><br><span class="meta">'+fmtDate(t.first)+' – '+fmtDate(t.last)+' · '+t.matches.length+' matches · '+tag(t).game+' · '+t.org+'</span></span>'+pill(tStatus(t))+'</button>';});
   h+='</div>';
   app.innerHTML=h;
   document.getElementById("prev").onclick=function(){view.setMonth(view.getMonth()-1);render();};
   document.getElementById("next").onclick=function(){view.setMonth(view.getMonth()+1);render();};
   app.querySelectorAll("[data-t]").forEach(function(b){b.onclick=function(){location.hash="t-"+b.getAttribute("data-t");};});
+  app.querySelectorAll("[data-g]").forEach(function(b){b.onclick=function(){F.game=b.getAttribute("data-g");render();};});
+  document.getElementById("fin").onchange=function(){F.india=this.checked;render();};
 }
 
 function tournament(id){
@@ -185,7 +232,7 @@ function tournament(id){
     var k=dkey(m.start);
     if(k!==cur){cur=k;h+='<div class="dayh">'+fmtDate(m.start,{weekday:"long",day:"numeric",month:"long"})+'</div>';}
     var s=status(m);
-    h+='<div class="mrow"><div class="tm">'+fmtTime(m.start)+'</div><div><b>'+m.name+'</b><div class="st">'+(s==="up"?left(m):s==="live"?"Happening now":"Ended")+'</div></div><div class="act">'+pill(s)+' '+watchBtn(m)+'</div></div>';
+    h+='<div class="mrow"><div class="tm">'+fmtTime(m.start)+'</div><div><b>'+m.name+'</b><div class="st">'+(s==="up"?left(m):s==="live"?"Happening now":"Ended")+'</div></div><div class="act acts">'+pill(s)+' '+watchBtn(m)+(s==="end"?"":calBtns(t,m))+'</div></div>';
   });
   app.innerHTML=h;
   document.getElementById("back").onclick=function(){location.hash="";};
