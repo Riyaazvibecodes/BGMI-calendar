@@ -89,7 +89,7 @@ function d(off,h,m){var t=new Date();t.setDate(t.getDate()+off);t.setHours(h,m||
 var SAMPLE_LINK = "https://www.youtube.com/";
 function hm(t){return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");}
 /* pmDays: [[date, link], ...], matches per day, minutes between matches, minutes a match runs. First match 5:30 PM IST. */
-function pmDays(days,count,gap,mins){var out=[];days.forEach(function(x,i){for(var n=0;n<count;n++){out.push({name:"Day "+(i+1)+" – Match "+(n+1),start:x[0]+"T"+hm(1050+n*gap)+":00"+IST,mins:mins,link:x[1]||""});}});return out;}
+function pmDays(days,count,gap,mins,st){var out=[];days.forEach(function(x,i){for(var n=0;n<count;n++){out.push({name:"Day "+(i+1)+" – Match "+(n+1),start:x[0]+"T"+hm((st||1050)+n*gap)+":00"+IST,mins:mins,link:x[1]||""});}});return out;}
 /* pmTba: one placeholder entry per day until the real match schedule is out. */
 function pmTba(days){return days.map(function(x,i){return {name:"Day "+(i+1)+" – matches (times to be confirmed)",start:x+"T"+hm(1050)+":00"+IST,mins:240,link:""};});}
 /* fixedDays: [[date, link], ...] and a list of start times in minutes after midnight IST (e.g. 810 = 1:30 PM). */
@@ -108,9 +108,9 @@ var TOURNAMENTS = [
  {id:"cegc-grand-finals",name:"CEGC Grand Finals",org:"Skyesports (Chennai Esports Global Championship)",color:"#B4234F",
   matches:fixedDays([["2026-12-11"],["2026-12-12"],["2026-12-13"]],[810,845,890,930,970,1010],40)},
  {id:"pic-last-chance",name:"PIC Last Chance (PUBG PC)",org:"KRAFTON India",color:"#475569",
-  matches:pmTba(["2026-11-26"])},
+  matches:pmDays([["2026-11-26","https://www.youtube.com/live/uTqA0ThIcXE"]],6,40,40,1110)},
  {id:"pic-grand-finals",name:"PIC Grand Finals (PUBG PC)",org:"KRAFTON India",color:"#0E7490",
-  matches:pmTba(["2026-11-28","2026-11-29"])},
+  matches:pmDays([["2026-11-28"],["2026-11-29"]],5,40,40,1110)},
 
 ];
 /* ============================================= */
@@ -212,7 +212,7 @@ function home(){
   var y=view.getFullYear(),mo=view.getMonth(),offset=(view.getDay()+6)%7,days=new Date(y,mo+1,0).getDate();
   var live=[];TOURNAMENTS.forEach(function(t){t.matches.forEach(function(m){if(status(m)==="live")live.push({t:t,m:m});});});
   var h='<div class="top"><div><h1>Esports match calendar</h1><p class="sub">Pick a tournament, then open any match when it goes live.</p></div></div>';
-  h+='<p class="note">PMGC matches start at 5:30 PM IST with a 40-minute gap between matches. CEGC and PIC stage dates come from published schedules, but their match times are not confirmed yet. Stream links fill in automatically once organisers schedule them on YouTube, and CEGC links are added by hand.</p>';
+  h+='<p class="note">PMGC matches start at 5:30 PM IST with a 40-minute gap between matches. PIC matches start at 6:30 PM IST. CEGC match times are not confirmed yet. Stream links fill in automatically once organisers schedule them on YouTube, and CEGC links are added by hand.</p>';
   h+=filtersHtml()+liveHtml()+todayHtml();
   h+='<div class="cal-head"><button class="btn" id="prev" aria-label="Previous month">‹ Prev</button><h2>'+MONTHS[mo]+" "+y+'</h2><button class="btn" id="next" aria-label="Next month">Next ›</button></div>';
   h+='<div class="grid-scroll"><div class="grid">'+DAY.map(function(x){return '<div class="dow">'+x+'</div>';}).join("");
@@ -268,4 +268,3 @@ fetch("links.json?t="+Date.now()).then(function(r){return r.ok?r.json():null;}).
 </script>
 </body>
 </html>
-
