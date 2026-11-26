@@ -18,9 +18,9 @@ CHANNELS = {
     "KRAFTON INDIA ESPORTS": "UCugG6-k5QGbq_iDEPAnG4NQ",
 }
 
-# Also ask YouTube's search for "upcoming" streams. Costs 100 quota units per channel per run,
-# which is fine on the free quota (10,000 a day) when this runs every 2 hours.
-SEARCH_UPCOMING = True
+# Also ask YouTube's search for "upcoming" and "live" streams. Each search costs 100 quota units,
+# so 3 channels x 2 searches x 12 runs a day = about 7,200 of the free 10,000 daily units.
+SEARCH_STREAMS = True
 KEEP_PAST_DAYS = 3     # keep streams that started up to 3 days ago
 KEEP_FUTURE_DAYS = 45  # and streams scheduled up to 45 days ahead
 OUT_FILE = "links.json"
@@ -40,12 +40,15 @@ def candidate_ids(channel_id):
         ids.update(i["contentDetails"]["videoId"] for i in data.get("items", []))
     except Exception as err:
         print("  playlist lookup failed:", err)
-    if SEARCH_UPCOMING:
-        try:
-            data = api("search", part="id", channelId=channel_id, eventType="upcoming", type="video", maxResults=50)
-            ids.update(i["id"]["videoId"] for i in data.get("items", []))
-        except Exception as err:
-            print("  upcoming search failed:", err)
+    if SEARCH_STREAMS:
+        for kind in ("upcoming", "live"):
+            try:
+                data = api("search", part="id", channelId=channel_id, eventType=kind, type="video", maxResults=50)
+                found = [i["id"]["videoId"] for i in data.get("items", [])]
+                print("  %s streams found: %d" % (kind, len(found)))
+                ids.update(found)
+            except Exception as err:
+                print("  %s search failed: %s" % (kind, err))
     return ids
 
 
@@ -77,6 +80,7 @@ def main():
                 when = datetime.datetime.fromisoformat(start.replace("Z", "+00:00"))
                 if not (low <= when <= high):
                     continue
+                print("  +", v["snippet"]["title"], "|", start)
                 entries.append({
                     "videoId": v["id"],
                     "title": v["snippet"]["title"],
