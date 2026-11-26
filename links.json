@@ -1,1 +1,61 @@
-{ "updated": null, "videos": [] }
+{
+  "updated": "2026-11-26T04:55:04+00:00",
+  "videos": [
+    {
+      "videoId": "C0WvVCYtL-Y",
+      "title": "[EN] 2026 PMGC League | The Gauntlet Day 1 | PUBG MOBILE Global Championship",
+      "channel": "PUBG MOBILE Esports",
+      "url": "https://www.youtube.com/watch?v=C0WvVCYtL-Y",
+      "scheduledStart": "2026-11-26T11:15:00Z",
+      "state": "upcoming"
+    },
+    {
+      "videoId": "Sj_LC91WO5E",
+      "title": "[NP] 2026 PMGC League | The Gauntlet Day 1 | PUBG MOBILE Global Championship",
+      "channel": "PUBG MOBILE Esports South Asia",
+      "url": "https://www.youtube.com/watch?v=Sj_LC91WO5E",
+      "scheduledStart": "2026-11-26T11:15:00Z",
+      "state": "upcoming"
+    },
+    {
+      "videoId": "R4RM2pjvEtI",
+      "title": "[MAP STREAM] PIC 2026 | Last Chance | #GoBeyond",
+      "channel": "KRAFTON INDIA ESPORTS",
+      "url": "https://www.youtube.com/watch?v=R4RM2pjvEtI",
+      "scheduledStart": "2026-11-26T12:55:00Z",
+      "state": "upcoming"
+    },
+    {
+      "videoId": "RMzzbopVQQk",
+      "title": "[HINDI] PIC 2026 | Last Chance | #GoBeyond",
+      "channel": "KRAFTON INDIA ESPORTS",
+      "url": "https://www.youtube.com/watch?v=RMzzbopVQQk",
+      "scheduledStart": "2026-11-26T12:55:00Z",
+      "state": "upcoming"
+    },
+    {
+      "videoId": "uTqA0ThIcXE",
+      "title": "[ENGLISH] PIC 2026 | Last Chance | #GoBeyond",
+      "channel": "KRAFTON INDIA ESPORTS",
+      "url": "https://www.youtube.com/watch?v=uTqA0ThIcXE",
+      "scheduledStart": "2026-11-26T12:55:00Z",
+      "state": "upcoming"
+    },
+    {
+      "videoId": "CE4khC0Ppak",
+      "title": "[NP] 2026 PMGC League | The Gauntlet Day 2 | PUBG MOBILE Global Championship",
+      "channel": "PUBG MOBILE Esports South Asia",
+      "url": "https://www.youtube.com/watch?v=CE4khC0Ppak",
+      "scheduledStart": "2026-11-27T11:15:00Z",
+      "state": "upcoming"
+    },
+    {
+      "videoId": "wrlMMXyweKs",
+      "title": "[EN] 2026 PMGC League | The Gauntlet Day 2 | PUBG MOBILE Global Championship",
+      "channel": "PUBG MOBILE Esports",
+      "url": "https://www.youtube.com/watch?v=wrlMMXyweKs",
+      "scheduledStart": "2026-11-27T11:35:00Z",
+      "state": "upcoming"
+    }
+  ]
+}
